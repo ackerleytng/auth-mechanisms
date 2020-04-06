@@ -1,0 +1,27 @@
+client-id: httpbin
+discovery-url: https://keycloak:8443/auth/realms/applications
+encryption-key: AgXa7xRcoClDEU0ZDSH4X0XhL5Qy2Z2j
+
+# Turn on debug
+verbose: true
+
+enable-self-signed-tls: true
+listen: :443
+redirection-url: https://localhost:7443
+upstream-url: http://httpbin
+
+enable-default-deny: true
+resources:
+# Whitelist everything needed to show API landing page
+- uri: /
+  methods:
+  - GET
+  white-listed: true
+- uri: /spec.json
+  methods:
+  - GET
+  white-listed: true
+- uri: /flasgger_static/*
+  methods:
+  - GET
+  white-listed: true
