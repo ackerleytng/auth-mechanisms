@@ -223,6 +223,69 @@ allows the client to use the ID Token in one round trip
 
 ## Interesting Security Considerations
 
+### Request Disclosure
+
+Mitigations
++ Use TLS all the way
++ Use `request` parameter to pass requests as a JWT to the authorization server
+  + Can encrypt the JWT
++ Use `request_uri` to pass the request parameters by reference
+
+### Server Masquerading
+
+Mitigations
++ Client authenticates servers using TLS
++ Signed or encrypted JWTs to authenticate server
+
+### Token Manufacture/Modification
+
++ Extension of validity period
++ Increased scope
+
+Mitigations
++ Token should be digitally signed by the OP, RP should validate the signature
++ Use TLS to guard against third party attackers
+
+### Access Token Redirect
+
+Attacker uses access token for one resource to obtain access to a second resource
+
+Mitigations
++ Access token should be audience and scope restricted
+
 ### Token Substitution
 
-> Continue looking into this: https://openid.net/specs/openid-connect-core-1_0.html
+A malicious user swaps tokens, e.g. swap an Authorization Code for a legitimate
+user with another token the attacker has. Attacker can copy the token out of
+one session and use it in a HTTP message for a different session. Known as "cut
+and paste" attack.
+
+Implicit Flow of OAuth 2.0 is not designed to mitigate this risk
+
+In OpenID Connect, this is mitigated through the ID Token. ID Token is a signed
+security token thaht provides claims such as `iss`, `sub`, `aud`, `azp`,
+`at_hash`, `c_hash`. Can use the ID token to detect token substitution attack.
+
+`c_hash` is used to prevent Authorization Code substitution and `at_hash` is
+used to prevent Authorization Code substitution.
+
+Attacker can subvert the communication channel between the Authorization/Token
+Endpoint and Client to reorder messages. This can be mitigated by using TLS.
+
+### Timing Attack
+
+Use elapsed time differences taken by successful and unsuccessful decryption
+operations.
+
+Mitigations
++ Don't terminate validation process early
++ Intentionally slow unsuccessful code path
++ Rate limiting
+
+## Interesting Privacy Considerations
+
+### Need for Encrypted Requests
+
+Sometimes, just knowing that the client is requesting for a certain claim is
+revealing something about the user. Encrypt requests to prevent this kind of
+leakage.
