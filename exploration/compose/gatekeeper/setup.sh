@@ -22,7 +22,7 @@ curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $toke
 client_id=$(curl -X GET -H "Content-Type: application/json" -H "Authorization: Bearer $token" -sSk "$keycloak_url/auth/admin/realms/applications/clients" | jq -r '.[] | select(.clientId == "httpbin") | .id')
 
 # Add the Audience mapper for this client (aud claim should read httpbin)
-curl -H "Content-Type: application/json" -H "Authorization: Bearer $token" -sSk "$keycloak_url/auth/admin/realms/applications/clients/$client_id/protocol-mappers/models" --data-binary '{"protocol":"openid-connect","config":{"id.token.claim":"false","access.token.claim":"true","included.client.audience":"httpbin"},"name":"httpbin-aud","protocolMapper":"oidc-audience-mapper"}'
+curl -H "Content-Type: application/json" -H "Authorization: Bearer $token" -sSk "$keycloak_url/auth/admin/realms/applications/clients/$client_id/protocol-mappers/models" --data-binary '{"protocol":"openid-connect","config":{"id.token.claim":"false","access.token.claim":"true","included.client.audience":"httpbin"},"name":"httpbin-aud","protocolMapper":"oidc-audience-mapper"}' > /dev/null
 
 # Get httpbin's secret
 curl -X GET -H "Content-Type: application/json" -H "Authorization: Bearer $token" -sSk "$keycloak_url/auth/admin/realms/applications/clients/$client_id/client-secret" | jq -r '.value'
