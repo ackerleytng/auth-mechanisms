@@ -53,18 +53,54 @@ Protected App (httpbin)->Keycloak: Authenticates with Keycloak,\nsends Authoriza
 activate Keycloak
 note right of Keycloak: Validates Authorization Code
 
-Keycloak-->Protected App (httpbin): Return Access Token
+Keycloak-->Protected App (httpbin): Return Access Token and Refresh Token
 deactivate Keycloak
 
-Protected App (httpbin)-->Browser: 307 Location: https://httpbin.example.com\nAlso set Access Token in a Cookie (kc-access)\nAccess Token lasts 5 min by default
+Protected App (httpbin)-->Browser: 307 Location: https://httpbin.example.com\nAlso set Access Token in a Cookie (kc-access)\nAccess Token lasts 5 min by default\nAlso set Refresh Token in a Cookie (kc-state)\nRefresh Token is encrypted with a symmetric key (in gatekeeper config)
 deactivate Protected App (httpbin)
 
-Browser->Protected App (httpbin): GET https://httpbin.example.com\nThis time with Access Token in Header (from Cookie)
+Browser->Protected App (httpbin): GET https://httpbin.example.com\nThis time with Access Token and Refresh Token in Header (from Cookie)
 
 activate Protected App (httpbin)
 note right of Protected App (httpbin): Validate Access Token
 
 Protected App (httpbin)-->Browser: Return protected resource
+deactivate Protected App (httpbin)
+
+Browser->User: Display "httpbin"
+deactivate Browser
+
+==Second Access To Same Application==
+
+User->Browser: Goto "httpbin"
+activate Browser
+
+Browser->Protected App (httpbin): GET https://httpbin.example.com\nThis time with Access Token and Refresh Token in Header (from Cookie)
+
+activate Protected App (httpbin)
+note right of Protected App (httpbin): Validate Access Token
+
+Protected App (httpbin)-->Browser: Return protected resource
+deactivate Protected App (httpbin)
+
+Browser->User: Display "httpbin"
+deactivate Browser
+
+==Access To Same Application After Access Token Expires==
+
+User->Browser: Goto "httpbin"
+activate Browser
+
+Browser->Protected App (httpbin): GET https://httpbin.example.com\nThis time with Access Token and Refresh Token in Header (from Cookie)
+
+activate Protected App (httpbin)
+note right of Protected App (httpbin): Validate Access Token,\nAccess Token expired
+
+Protected App (httpbin)->Keycloak: Decrypts Refresh Token from Header,\nAuthenticates with Keycloak,\nSends Refresh Token over https
+
+Keycloak-->Protected App (httpbin): Return New Access Token and Refresh Token
+
+Protected App (httpbin)-->Browser: Return protected resource,\nwith new Access Token and Refresh Token (encrypted) set as cookie
 deactivate Protected App (httpbin)
 
 Browser->User: Display "httpbin"
