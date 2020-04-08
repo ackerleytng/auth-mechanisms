@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: password
 
-  keycloak:
+  keycloak.test:
     image: jboss/keycloak:9.0.2
     volumes:
       - ./compose/keycloak/https/:/etc/x509/https
@@ -38,7 +38,7 @@ services:
     ports:
       - 7443:443
     depends_on:
-      - keycloak
+      - keycloak.test
 
   httpbin:
     image: kennethreitz/httpbin
@@ -54,7 +54,7 @@ services:
     ports:
       - 6443:443
     depends_on:
-      - keycloak
+      - keycloak.test
 
   httpbin-two:
     image: kennethreitz/httpbin
