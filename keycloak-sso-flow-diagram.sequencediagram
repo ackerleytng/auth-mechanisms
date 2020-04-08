@@ -1,0 +1,71 @@
+# Paste this at https://sequencediagram.org/ to render
+
+title OpenID Connect/Keycloak SSO Sequence Diagram
+
+==First Access==
+
+User->Browser: Goto "httpbin"
+activate Browser
+
+Browser->Protected App (httpbin): GET https://httpbin.example.com
+
+activate Protected App (httpbin)
+note right of Protected App (httpbin): No access token, so forward\nto authorize endpoint
+
+Protected App (httpbin)-->Browser: 307 Location: https://httpbin.example.com/oauth/authorize?state=<uuid-auth>\nThis is probably a keycloak-gatekeeper specific implementation -\nto generate the OpenID redirect to the provider
+deactivate Protected App (httpbin)
+
+Browser->Protected App (httpbin): GET https://httpbin.example.com/oauth/authorize?state=<uuid-auth>
+activate Protected App (httpbin)
+
+Protected App (httpbin)-->Browser: 307 Location: https://keycloak.com/auth/realms/applications/protocol/openid-connect/auth\n?client_id=httpbin\n&redirect_uri=https://httpbin.example.com/oauth/callback\n&response_type=code\n&scope=openid+email+profile\n&state=<uuid-auth>\nAlso set OAuth Token Request State (CSRF Protection)
+deactivate Protected App (httpbin)
+
+Browser->Keycloak: GET https://keycloak.com/auth/realms/applications/protocol/openid-connect/auth\n?client_id=httpbin\n&redirect_uri=https://httpbin.example.com/oauth/callback\n&response_type=code\n&scope=openid+email+profile\n&state=<uuid-auth>
+
+activate Keycloak
+note right of Keycloak: User is not authenticated,\n so present login form
+
+Keycloak-->Browser: Return login form with parameters from httpbin's request stored in a JWT.\nKeycloak's CSRF protection is handled using server-side sessions
+deactivate Keycloak
+
+Browser->User: Display Keycloak\nlogin form
+activate User
+
+User->Browser: Fill and\nsubmit login form
+deactivate User
+
+Browser->Keycloak: POST https://keycloak.com/auth/realms/applications/login-actions/authenticate\n?client_id=httpbin\n&<more Keycloak-specific parameters\nUsername and password POSTed in Body\nKeycloak session ID, httpbin's request JWT returned to Keycloak in Headers
+
+activate Keycloak
+Keycloak->Keycloak: Authenticate User
+
+Keycloak-->Browser: 302 Location: https://httpbin.example.com/oauth/callback\n?state=<uuid-auth>\n&session_state=<Keycloak parameter to link this redirect with token set in cookie on Keycloak site>\n&code=<OAuth 2.0 authorization code>\nAlso set cookie on Keycloak site to indicate that user has logged in
+deactivate Keycloak
+
+Browser->Protected App (httpbin): GET https://httpbin.example.com/oauth/callback\n?state=<uuid-auth>\n&session_state=<Keycloak parameter to link this redirect with token set in cookie on Keycloak site>\n&code=<OAuth 2.0 authorization code>\nAlso send cookie with OAuth Token Request State (CSRF Protection)
+
+activate Protected App (httpbin)
+note right of Protected App (httpbin): Validates CSRF Token
+
+Protected App (httpbin)->Keycloak: Authenticates with Keycloak,\nsends Authorization Code over https
+
+activate Keycloak
+note right of Keycloak: Validates Authorization Code
+
+Keycloak-->Protected App (httpbin): Return Access Token
+deactivate Keycloak
+
+Protected App (httpbin)-->Browser: 307 Location: https://httpbin.example.com\nAlso set Access Token in a Cookie (kc-access)\nAccess Token lasts 5 min by default
+deactivate Protected App (httpbin)
+
+Browser->Protected App (httpbin): GET https://httpbin.example.com\nThis time with Access Token in Header (from Cookie)
+
+activate Protected App (httpbin)
+note right of Protected App (httpbin): Validate Access Token
+
+Protected App (httpbin)-->Browser: Return protected resource
+deactivate Protected App (httpbin)
+
+Browser->User: Display "httpbin"
+deactivate Browser

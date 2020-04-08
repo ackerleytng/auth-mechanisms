@@ -13,3 +13,4 @@ Some notes on authentication and authorization mechanisms
 
 + [OpenID Connect Notes](./openid-connect.md)
 + [CAS Notes](./cas-notes.md)
++ [Comparing CAS with OAuth2 as implemented by Keycloak, used as an SSO system](./cas-vs-oauth.md)
