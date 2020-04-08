@@ -45,5 +45,21 @@ services:
     depends_on:
       - gatekeeper
 
+  gatekeeper-two:
+    image: alpine:3.8
+    volumes:
+      - ./compose/gatekeeper-two/:/gatekeeper
+      - ./compose/keycloak/https/tls.crt/:/usr/local/share/ca-certificates/tls.crt:ro
+    entrypoint: /gatekeeper/start.sh
+    ports:
+      - 6443:443
+    depends_on:
+      - keycloak
+
+  httpbin-two:
+    image: kennethreitz/httpbin
+    depends_on:
+      - gatekeeper-two
+
 volumes:
   postgres-data:

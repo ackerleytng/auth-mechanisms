@@ -97,11 +97,67 @@ activate Protected App (httpbin)
 note right of Protected App (httpbin): Validate Access Token,\nAccess Token expired
 
 Protected App (httpbin)->Keycloak: Decrypts Refresh Token from Header,\nAuthenticates with Keycloak,\nSends Refresh Token over https
+activate Keycloak
 
 Keycloak-->Protected App (httpbin): Return New Access Token and Refresh Token
+deactivate Keycloak
 
 Protected App (httpbin)-->Browser: Return protected resource,\nwith new Access Token and Refresh Token (encrypted) set as cookie
 deactivate Protected App (httpbin)
 
 Browser->User: Display "httpbin"
+deactivate Browser
+
+==First Access to Second Application==
+
+User->Browser: Goto "httpbin-two"
+activate Browser
+
+Browser->Protected App (httpbin-two): GET https://httpbin-two.example.com
+
+activate Protected App (httpbin-two)
+note right of Protected App (httpbin-two): No access token, so forward\nto authorize endpoint
+
+Protected App (httpbin-two)-->Browser: 307 Location: https://httpbin-two.example.com/oauth/authorize?state=<uuid-auth>
+deactivate Protected App (httpbin-two)
+
+Browser->Protected App (httpbin-two): GET https://httpbin-two.example.com/oauth/authorize?state=<uuid-auth>
+activate Protected App (httpbin-two)
+
+Protected App (httpbin-two)-->Browser: 307 Location: https://keycloak.com/auth/realms/applications/protocol/openid-connect/auth\n?client_id=httpbin-two\n&redirect_uri=https://httpbin-two.example.com/oauth/callback\n&response_type=code\n&scope=openid+email+profile\n&state=<uuid-auth>\nAlso set OAuth Token Request State (CSRF Protection)
+deactivate Protected App (httpbin-two)
+
+Browser->Keycloak: GET https://keycloak.com/auth/realms/applications/protocol/openid-connect/auth\n?client_id=httpbin-two\n&redirect_uri=https://httpbin-two.example.com/oauth/callback\n&response_type=code\n&scope=openid+email+profile\n&state=<uuid-auth>\nThis time with Keycloak Session ID and Identity in Headers (from Cookies)
+
+activate Keycloak
+note right of Keycloak: User is authenticated\n(through Session information)
+
+Keycloak-->Browser: 302 Location: https://httpbin-two.example.com/oauth/callback\n?state=<uuid-auth>\n&session_state=<Keycloak parameter to link this redirect with token set in cookie on Keycloak site>\n&code=<OAuth 2.0 authorization code>
+deactivate Keycloak
+
+Browser->Protected App (httpbin-two): GET https://httpbin-two.example.com/oauth/callback\n?state=<uuid-auth>\n&session_state=<Keycloak parameter to link this redirect with token set in cookie on Keycloak site>\n&code=<OAuth 2.0 authorization code>\nAlso send cookie with OAuth Token Request State (CSRF Protection)
+
+activate Protected App (httpbin-two)
+note right of Protected App (httpbin-two): Validates CSRF Token
+
+Protected App (httpbin-two)->Keycloak: Authenticates with Keycloak,\nsends Authorization Code over https
+
+activate Keycloak
+note left of Keycloak: Validates Authorization Code
+
+Keycloak-->Protected App (httpbin-two): Return Access Token and Refresh Token
+deactivate Keycloak
+
+Protected App (httpbin-two)-->Browser: 307 Location: https://httpbin-two.example.com\nAlso set Access Token in a Cookie (kc-access)\nAccess Token lasts 5 min by default\nAlso set Refresh Token in a Cookie (kc-state)\nRefresh Token is encrypted with a symmetric key (in gatekeeper config)
+deactivate Protected App (httpbin-two)
+
+Browser->Protected App (httpbin-two): GET https://httpbin-two.example.com\nThis time with Access Token and Refresh Token in Header (from Cookie)
+
+activate Protected App (httpbin-two)
+note right of Protected App (httpbin-two): Validate Access Token
+
+Protected App (httpbin-two)-->Browser: Return protected resource
+deactivate Protected App (httpbin-two)
+
+Browser->User: Display "httpbin-two"
 deactivate Browser
