@@ -5,6 +5,8 @@ encryption-key: AgXa7xRcoClDEU0ZDSH4X0XhL5Qy2Z2j
 # Turn on debug
 verbose: true
 
+enable-refresh-tokens: true
+
 enable-self-signed-tls: true
 listen: :443
 redirection-url: https://localhost:7443
