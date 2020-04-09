@@ -1,5 +1,5 @@
 client-id: httpbin-two
-discovery-url: https://keycloak.test:8443/auth/realms/applications
+discovery-url: https://keycloak.localhost/auth/realms/applications
 encryption-key: sKBQzdR45IyzbfuYhSXnHR3rRXfW5wGg
 
 # Turn on debug
@@ -9,7 +9,7 @@ enable-refresh-tokens: true
 
 enable-self-signed-tls: true
 listen: :443
-redirection-url: https://httpbin-two.test:6443
+redirection-url: https://httpbin-two.localhost
 upstream-url: http://httpbin-two
 
 enable-default-deny: true

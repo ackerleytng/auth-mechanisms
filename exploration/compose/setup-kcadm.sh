@@ -11,8 +11,8 @@ result=$(kcadm.sh create clients -r applications -f - << EOF
   "clientId": "httpbin",
   "name": "httpbin",
   "enabled": true,
-  "baseUrl": "https://httpbin.test:7443",
-  "redirectUris": ["https://httpbin.test:7443/*"]
+  "baseUrl": "https://httpbin.localhost",
+  "redirectUris": ["https://httpbin.localhost/*"]
 }
 EOF
       )

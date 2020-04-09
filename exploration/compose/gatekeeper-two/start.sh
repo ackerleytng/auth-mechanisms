@@ -4,7 +4,7 @@ NAME=keycloak-gatekeeper
 KEYCLOAK_VERSION=9.0.2
 GOOS=linux
 GOARCH=amd64
-export KEYCLOAK_URL=https://keycloak.test:8443
+export KEYCLOAK_URL=https://keycloak.localhost
 
 command -v curl || apk add --no-cache ca-certificates curl tar bash
 command -v jq || curl -o /bin/jq -L https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && chmod +x /bin/jq
@@ -17,7 +17,7 @@ command -v wait-for-it.sh || curl -o /bin/wait-for-it.sh https://raw.githubuserc
 update-ca-certificates
 
 # Wait for keycloak to be ready
-wait-for-it.sh keycloak.test:8443
+wait-for-it.sh keycloak.localhost:443
 
 # Sets up this client with keycloak
 client_secret=$(/gatekeeper/setup.sh)

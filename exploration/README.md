@@ -2,14 +2,6 @@
 
 ## Quickstart
 
-Add this to your hosts file
-
-```
-127.0.0.1 keycloak.test
-127.0.0.1 httpbin.test
-127.0.0.1 httpbin-two.test
-```
-
 Start everything
 
 ```
@@ -26,11 +18,11 @@ docker-compose logs -f
 
 ### Browser
 
-Start your browser, visit https://httpbin.test:7443 (include the https part - Chrome will not add it automatically for you)
+Start your browser, visit https://httpbin.localhost
 
 Everything should load as per normal.
 
-Now, in your address bar, try https://httpbin.test:7443/get
+Now, in your address bar, try https://httpbin.localhost/get
 
 You should get redirected to keycloak for a login. Log in with `user0` and `password`.
 
@@ -38,7 +30,7 @@ You should be prompted to change your password. Change it to whatever you like.
 
 ### Keycloak admin
 
-Visit https://keycloak.test:8443/
+Visit https://keycloak.localhost/
 
 Log in with `admin` and `password`
 

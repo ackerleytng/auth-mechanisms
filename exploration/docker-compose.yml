@@ -1,6 +1,29 @@
-version: '3'
+version: '3.7'
 
 services:
+  traefik:
+    image: "traefik:v2.2"
+    container_name: "traefik"
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      default:
+        aliases:
+          - keycloak.localhost
+          - httpbin.localhost
+          - httpbin-two.localhost
+
   postgres:
     image: postgres:12
     volumes:
@@ -9,8 +32,9 @@ services:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: password
+    container_name: keycloak-postgres
 
-  keycloak.test:
+  keycloak:
     image: jboss/keycloak:9.0.2
     volumes:
       - ./compose/keycloak/https/:/etc/x509/https
@@ -23,27 +47,37 @@ services:
       DB_PASSWORD: password
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: password
-    ports:
-      - 8080:8080
-      - 8443:8443
     depends_on:
       - postgres
-
+    container_name: keycloak
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.keycloak.rule=HostSNI(`keycloak.localhost`)"
+      - "traefik.tcp.routers.keycloak.tls.passthrough=true"
+      - "traefik.tcp.routers.keycloak.entrypoints=websecure"
+      - "traefik.tcp.services.keycloak.loadbalancer.server.port=8443"
   gatekeeper:
     image: alpine:3.8
     volumes:
       - ./compose/gatekeeper/:/gatekeeper
       - ./compose/keycloak/https/tls.crt/:/usr/local/share/ca-certificates/tls.crt:ro
     entrypoint: /gatekeeper/start.sh
-    ports:
-      - 7443:443
     depends_on:
-      - keycloak.test
+      - keycloak
+    expose:
+      - 443
+    container_name: httpbin-gatekeeper
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.httpbin.rule=HostSNI(`httpbin.localhost`)"
+      - "traefik.tcp.routers.httpbin.tls.passthrough=true"
+      - "traefik.tcp.routers.httpbin.entrypoints=websecure"
 
   httpbin:
     image: kennethreitz/httpbin
     depends_on:
       - gatekeeper
+    container_name: httpbin-protected-app
 
   gatekeeper-two:
     image: alpine:3.8
@@ -51,15 +85,22 @@ services:
       - ./compose/gatekeeper-two/:/gatekeeper
       - ./compose/keycloak/https/tls.crt/:/usr/local/share/ca-certificates/tls.crt:ro
     entrypoint: /gatekeeper/start.sh
-    ports:
-      - 6443:443
     depends_on:
-      - keycloak.test
+      - keycloak
+    expose:
+      - 443
+    container_name: httpbin-two-gatekeeper
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.httpbin-two.rule=HostSNI(`httpbin-two.localhost`)"
+      - "traefik.tcp.routers.httpbin-two.entrypoints=websecure"
+      - "traefik.tcp.routers.httpbin-two.tls.passthrough=true"
 
   httpbin-two:
     image: kennethreitz/httpbin
     depends_on:
       - gatekeeper-two
+    container_name: httpbin-two-protected-app
 
 volumes:
   postgres-data:
