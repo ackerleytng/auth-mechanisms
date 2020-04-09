@@ -10,6 +10,8 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--entrypoints.websecure.address=:443"
     ports:
       - "80:80"
@@ -20,6 +22,8 @@ services:
     networks:
       default:
         aliases:
+          # This allows the other containers to also reach the services through
+          #   this public address (as opposed to using hostnames)
           - keycloak.localhost
           - httpbin.localhost
           - httpbin-two.localhost
@@ -56,6 +60,7 @@ services:
       - "traefik.tcp.routers.keycloak.tls.passthrough=true"
       - "traefik.tcp.routers.keycloak.entrypoints=websecure"
       - "traefik.tcp.services.keycloak.loadbalancer.server.port=8443"
+
   gatekeeper:
     image: alpine:3.8
     volumes:
