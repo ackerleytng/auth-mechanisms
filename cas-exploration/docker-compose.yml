@@ -1,0 +1,41 @@
+version: '3.7'
+
+services:
+  traefik:
+    image: "traefik:v2.2"
+    container_name: "traefik"
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      # - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.websecure.address=:443"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      default:
+        aliases:
+          # This allows the other containers to also reach the services through
+          #   this public address (as opposed to using hostnames)
+          - cas.localhost
+          - toy-app.localhost
+
+  toy-app:
+    build:
+      context: toy-app/
+    image: toy-app-image
+    container_name: toy-app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.toy-app.rule=Host(`toy-app.localhost`)"
+      - "traefik.http.routers.toy-app.entrypoints=websecure"
+      - "traefik.http.routers.toy-app.tls=true"
+      - "traefik.http.routers.toy-app.tls.domains[0].main=toy-app.localhost"
+      - "traefik.http.services.toy-app.loadbalancer.server.port=8080"
