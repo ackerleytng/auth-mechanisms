@@ -5,6 +5,7 @@ Notes on fundamental stuff
 + [JWT](./jwt.md)
 + [JWE](./jwe.md)
 + [JWS](./jws.md)
++ [Token Types](./token-types.md)
 
 + If you want to have both signing and encryption, then first do the signing,
   then put the whole JWS as the payload of the JWE
