@@ -19,7 +19,7 @@ update-ca-certificates
 # Wait for keycloak to be ready (use a direct connection to the container to
 #   test, because traefik (keycloak.localhost) comes up way before the service
 #   is ready
-wait-for-it.sh keycloak:443
+wait-for-it.sh keycloak:8443
 
 # Sets up this client with keycloak
 client_secret=$(/gatekeeper/setup.sh)
