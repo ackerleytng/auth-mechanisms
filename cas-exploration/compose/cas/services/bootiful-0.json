@@ -1,0 +1,11 @@
+{
+    "@class" : "org.apereo.cas.services.RegexRegisteredService",
+    "id": 1,
+    "name": "bootiful",
+    "serviceId": "https://bootiful.localhost.*",
+    "accessStrategy" : {
+        "@class" : "org.apereo.cas.services.DefaultRegisteredServiceAccessStrategy",
+        "enabled" : true,
+        "ssoEnabled" : true
+    }
+}
