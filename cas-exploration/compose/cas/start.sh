@@ -15,4 +15,5 @@ exec java -server -noverify -Xmx2048M -jar cas.war \
      --cas.serviceRegistry.initFromJson=true \
      --cas.serviceRegistry.watcherEnabled=true \
      --cas.serviceRegistry.json.location=file:///services \
+     --cas.logout.followServiceRedirects=true \
      --cas.authn.accept.users=user::default,username::password
