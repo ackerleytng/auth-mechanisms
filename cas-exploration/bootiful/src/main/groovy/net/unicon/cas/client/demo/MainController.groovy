@@ -33,6 +33,19 @@ class MainController implements CasClientConfigurer {
     @RequestMapping(value = '/protected', method = RequestMethod.GET)
     def protected1(HttpServletRequest request, Model model) {
         AttributePrincipal principal = request.userPrincipal
+
+        /*
+          // If you want to quickly test how it looks like
+          //   Here's some fake data
+          def attributes = [
+              name: "Jerry",
+              address: "123 Sesame Street",
+              age: 12,
+              email: "jerry@gmail.com",
+          ]
+          def principal = [attributes: attributes]
+         */
+
         model.addAttribute('principal', principal)
         'protected'
     }

@@ -7,21 +7,37 @@
     <div th:replace="fragments/layout :: navbar">(navbar)</div>
 
     <div class="container">
-      <div class="starter-template">
-        <h2>You are in protected area. You are logged in as (<span th:text="${principal}">(principal)</span>)</h2>
-        <h3><a th:href="${@mainController.casLogoutUrl}">Log out</a></h3>
+      <div th:unless="${principal} == null" class="starter-template">
+        <h2 class="display-4">Principal Attributes</h2>
+
+        <p class="lead">You are in protected area.</p>
+
+        <div th:if="${not #maps.isEmpty(principal.attributes)}">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Attribute</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="attr : ${principal.attributes}">
+                <td th:text="${attr.key}">Attribute Key</td>
+                <td th:text="${attr.value}">Attribute Value</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <a th:href="${@mainController.casLogoutUrl}" class="btn btn-secondary btn-md">Log out</a>
       </div>
 
-      <div th:if="${not #maps.isEmpty(principal.attributes)}">
-        <h2>Principal Attributes</h2>
-        <table class="table table-striped">
-          <tr th:each="attr : ${principal.attributes}">
-            <td th:text="${attr.key}">Attribute Key</td>
-            <td th:text="${attr.value}">Attribute Value</td>
-          </tr>
-        </table>
+      <div th:if="${principal} == null">
+        <h1 class="display-4">You have not signed in!</h1>
+        <p class="lead">How did you get here...?</p>
       </div>
     </div>
+
   </body>
 
 </html>

@@ -13,7 +13,7 @@
   </head>
 
   <body>
-    <nav th:fragment="navbar" class="navbar navbar-expand-sm navbar-dark bg-dark">
+    <nav th:fragment="navbar" class="navbar navbar-expand-sm navbar-dark bg-dark mb-4">
       <a class="navbar-brand" th:href="@{/}">Bootiful CAS client</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
               aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,8 +21,20 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
-          <a class="nav-item nav-link" th:href="@{/}">Home <span class="sr-only">(current)</span></a>
-          <a class="nav-item nav-link" th:href="@{/protected}">Protected</a>
+          <a class="nav-item nav-link"
+             th:classappend="${#httpServletRequest.requestURI} == '/' ? 'active'"
+             th:href="@{/}">
+            Home <span class="sr-only">(current)</span>
+          </a>
+          <a class="nav-item nav-link"
+             th:classappend="${#httpServletRequest.requestURI} == '/protected' ? 'active'"
+             th:href="@{/protected}">
+            Protected
+          </a>
+          <a th:unless="${principal} == null" class="nav-item nav-link"
+             th:href="${@mainController.casLogoutUrl}">
+            Logout
+          </a>
         </div>
       </div>
     </nav>

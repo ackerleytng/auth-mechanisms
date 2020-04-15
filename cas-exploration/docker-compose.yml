@@ -47,8 +47,8 @@ services:
     container_name: bootiful
     volumes:
       - ./compose/bootiful/start.sh:/start.sh:ro
-      - ./compose/bootiful/application.yml:/tmp/application.yml:ro
       - ./compose/cas/certs/tls.crt:/tmp/tls.crt:ro
+      - ./bootiful:/bootiful
     entrypoint: /start.sh
     labels:
       - "traefik.enable=true"
@@ -56,4 +56,4 @@ services:
       - "traefik.http.routers.bootiful.entrypoints=websecure"
       - "traefik.http.routers.bootiful.tls=true"
       - "traefik.http.routers.bootiful.tls.domains[0].main=bootiful.localhost"
-      - "traefik.http.services.bootiful.loadbalancer.server.port=80"
+      - "traefik.http.services.bootiful.loadbalancer.server.port=8000"

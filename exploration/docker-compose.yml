@@ -51,6 +51,7 @@ services:
       DB_PASSWORD: password
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: password
+      KEYCLOAK_LOGLEVEL: DEBUG
     depends_on:
       - postgres
     container_name: keycloak
@@ -69,14 +70,13 @@ services:
     entrypoint: /gatekeeper/start.sh
     depends_on:
       - keycloak
-    expose:
-      - 443
     container_name: httpbin-gatekeeper
     labels:
       - "traefik.enable=true"
       - "traefik.tcp.routers.httpbin.rule=HostSNI(`httpbin.localhost`)"
       - "traefik.tcp.routers.httpbin.tls.passthrough=true"
       - "traefik.tcp.routers.httpbin.entrypoints=websecure"
+      - "traefik.tcp.services.httpbin.loadbalancer.server.port=443"
 
   httpbin:
     image: kennethreitz/httpbin
@@ -92,14 +92,13 @@ services:
     entrypoint: /gatekeeper/start.sh
     depends_on:
       - keycloak
-    expose:
-      - 443
     container_name: httpbin-two-gatekeeper
     labels:
       - "traefik.enable=true"
       - "traefik.tcp.routers.httpbin-two.rule=HostSNI(`httpbin-two.localhost`)"
       - "traefik.tcp.routers.httpbin-two.entrypoints=websecure"
       - "traefik.tcp.routers.httpbin-two.tls.passthrough=true"
+      - "traefik.tcp.services.httpbin-two.loadbalancer.server.port=443"
 
   httpbin-two:
     image: kennethreitz/httpbin
