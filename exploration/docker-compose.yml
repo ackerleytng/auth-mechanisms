@@ -27,6 +27,7 @@ services:
           - keycloak.localhost
           - httpbin.localhost
           - httpbin-two.localhost
+          - ace.localhost
 
   postgres:
     image: postgres:12
@@ -51,7 +52,7 @@ services:
       DB_PASSWORD: password
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: password
-      KEYCLOAK_LOGLEVEL: DEBUG
+      # KEYCLOAK_LOGLEVEL: DEBUG
     depends_on:
       - postgres
     container_name: keycloak
@@ -105,6 +106,32 @@ services:
     depends_on:
       - gatekeeper-two
     container_name: httpbin-two-protected-app
+
+  gatekeeper-ace:
+    image: alpine:3.8
+    volumes:
+      - ./compose/gatekeeper-ace/:/gatekeeper
+      - ./compose/keycloak/https/tls.crt/:/usr/local/share/ca-certificates/tls.crt:ro
+    entrypoint: /gatekeeper/start.sh
+    depends_on:
+      - keycloak
+    container_name: ace-gatekeeper
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.ace.rule=HostSNI(`ace.localhost`)"
+      - "traefik.tcp.routers.ace.tls.passthrough=true"
+      - "traefik.tcp.routers.ace.entrypoints=websecure"
+      - "traefik.tcp.services.ace.loadbalancer.server.port=443"
+
+  ace:
+    image: openjdk:8-alpine
+    container_name: ace
+    volumes:
+      - ./ace:/ace
+      - ./compose/ace/start.sh:/start.sh:ro
+      - ./compose/keycloak/https/tls.crt/:/tmp/tls.crt:ro
+    working_dir: /ace
+    entrypoint: /start.sh
 
 volumes:
   postgres-data:
