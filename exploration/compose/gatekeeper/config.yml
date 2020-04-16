@@ -7,6 +7,9 @@ verbose: true
 
 enable-refresh-tokens: true
 
+enable-self-signed-tls: true
+self-signed-tls-hostnames:
+  - httpbin.localhost
 listen: :443
 redirection-url: https://httpbin.localhost
 upstream-url: http://httpbin
