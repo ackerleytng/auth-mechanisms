@@ -1,0 +1,21 @@
+client-id: ace
+discovery-url: https://keycloak.localhost/auth/realms/applications
+encryption-key: zpOd7JAHsad7hhvk9EvKBHOII4k7qsyf
+
+# Turn on debug
+verbose: true
+
+enable-refresh-tokens: true
+
+enable-self-signed-tls: true
+listen: :443
+redirection-url: https://ace.localhost
+upstream-url: http://ace:8080
+
+# Whitelist everything for now
+enable-default-deny: false
+resources:
+- uri: /*
+  methods:
+  - GET
+  white-listed: true
