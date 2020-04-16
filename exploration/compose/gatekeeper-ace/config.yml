@@ -8,6 +8,8 @@ verbose: true
 enable-refresh-tokens: true
 
 enable-self-signed-tls: true
+self-signed-tls-hostnames:
+  - ace.localhost
 listen: :443
 redirection-url: https://ace.localhost
 upstream-url: http://ace:8080

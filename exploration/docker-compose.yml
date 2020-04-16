@@ -43,6 +43,9 @@ services:
     image: jboss/keycloak:9.0.2
     volumes:
       - ./compose/keycloak/https/:/etc/x509/https
+      - ./compose/keycloak/setup.sh/:/setup.sh
+      - ./compose/keycloak/start.sh/:/start.sh
+    entrypoint: /start.sh
     environment:
       DB_VENDOR: POSTGRES
       DB_ADDR: postgres
@@ -66,18 +69,23 @@ services:
   gatekeeper:
     image: alpine:3.8
     volumes:
-      - ./compose/gatekeeper/:/gatekeeper
+      - ./compose/gatekeeper/config.yml:/gatekeeper/config.yml:ro
+      - ./compose/setup.sh:/gatekeeper/setup.sh:ro
+      - ./compose/start.sh:/gatekeeper/start.sh:ro
       - ./compose/keycloak/https/tls.crt/:/usr/local/share/ca-certificates/tls.crt:ro
     entrypoint: /gatekeeper/start.sh
     depends_on:
       - keycloak
     container_name: httpbin-gatekeeper
+    environment:
+      GATEKEEPER_CLIENT_ID: httpbin
     labels:
       - "traefik.enable=true"
-      - "traefik.tcp.routers.httpbin.rule=HostSNI(`httpbin.localhost`)"
-      - "traefik.tcp.routers.httpbin.tls.passthrough=true"
-      - "traefik.tcp.routers.httpbin.entrypoints=websecure"
-      - "traefik.tcp.services.httpbin.loadbalancer.server.port=443"
+      - "traefik.http.routers.httpbin.rule=Host(`httpbin.localhost`)"
+      - "traefik.http.routers.httpbin.entrypoints=websecure"
+      - "traefik.http.routers.httpbin.tls=true"
+      - "traefik.http.routers.httpbin.tls.domains[0].main=httpbin.localhost"
+      - "traefik.http.services.httpbin.loadbalancer.server.port=443"
 
   httpbin:
     image: kennethreitz/httpbin
@@ -88,18 +96,23 @@ services:
   gatekeeper-two:
     image: alpine:3.8
     volumes:
-      - ./compose/gatekeeper-two/:/gatekeeper
+      - ./compose/gatekeeper-two/config.yml:/gatekeeper/config.yml:ro
+      - ./compose/setup.sh:/gatekeeper/setup.sh:ro
+      - ./compose/start.sh:/gatekeeper/start.sh:ro
       - ./compose/keycloak/https/tls.crt/:/usr/local/share/ca-certificates/tls.crt:ro
     entrypoint: /gatekeeper/start.sh
     depends_on:
       - keycloak
     container_name: httpbin-two-gatekeeper
+    environment:
+      GATEKEEPER_CLIENT_ID: httpbin-two
     labels:
       - "traefik.enable=true"
-      - "traefik.tcp.routers.httpbin-two.rule=HostSNI(`httpbin-two.localhost`)"
-      - "traefik.tcp.routers.httpbin-two.entrypoints=websecure"
-      - "traefik.tcp.routers.httpbin-two.tls.passthrough=true"
-      - "traefik.tcp.services.httpbin-two.loadbalancer.server.port=443"
+      - "traefik.http.routers.httpbin-two.rule=Host(`httpbin-two.localhost`)"
+      - "traefik.http.routers.httpbin-two.entrypoints=websecure"
+      - "traefik.http.routers.httpbin-two.tls=true"
+      - "traefik.http.routers.httpbin-two.tls.domains[0].main=httpbin-two.localhost"
+      - "traefik.http.services.httpbin-two.loadbalancer.server.port=443"
 
   httpbin-two:
     image: kennethreitz/httpbin
@@ -110,12 +123,16 @@ services:
   gatekeeper-ace:
     image: alpine:3.8
     volumes:
-      - ./compose/gatekeeper-ace/:/gatekeeper
+      - ./compose/gatekeeper-ace/config.yml:/gatekeeper/config.yml:ro
+      - ./compose/setup.sh:/gatekeeper/setup.sh:ro
+      - ./compose/start.sh:/gatekeeper/start.sh:ro
       - ./compose/keycloak/https/tls.crt/:/usr/local/share/ca-certificates/tls.crt:ro
     entrypoint: /gatekeeper/start.sh
     depends_on:
       - keycloak
     container_name: ace-gatekeeper
+    environment:
+      GATEKEEPER_CLIENT_ID: ace
     labels:
       - "traefik.enable=true"
       - "traefik.tcp.routers.ace.rule=HostSNI(`ace.localhost`)"
