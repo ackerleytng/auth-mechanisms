@@ -15,9 +15,12 @@ redirection-url: https://ace.localhost
 upstream-url: http://ace:8080
 
 # Whitelist everything for now
-enable-default-deny: false
+enable-default-deny: true
+
+# Use gatekeeper like kong, which handles all authentication
+# Only whitelist /, everything else requires authentication
 resources:
-- uri: /*
+- uri: /
   methods:
   - GET
   white-listed: true
