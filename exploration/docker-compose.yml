@@ -146,7 +146,8 @@ services:
       - ./compose/ace/start.sh:/start.sh:ro
       - ./compose/keycloak/https/tls.crt/:/tmp/tls.crt:ro
     working_dir: /ace
-    entrypoint: /start.sh
+    # Call /start.sh to start ace
+    entrypoint: tail -f /dev/null
 
 volumes:
   postgres-data:
