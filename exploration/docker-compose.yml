@@ -61,7 +61,7 @@ services:
     container_name: keycloak
     labels:
       - "traefik.enable=true"
-      - "traefik.tcp.routers.keycloak.rule=Host(`keycloak.localhost`) || HostSNI(`keycloak.localhost`)"
+      - "traefik.tcp.routers.keycloak.rule=HostSNI(`keycloak.localhost`)"
       - "traefik.tcp.routers.keycloak.tls.passthrough=true"
       - "traefik.tcp.routers.keycloak.entrypoints=websecure"
       - "traefik.tcp.services.keycloak.loadbalancer.server.port=8443"
@@ -81,7 +81,7 @@ services:
       GATEKEEPER_CLIENT_ID: httpbin
     labels:
       - "traefik.enable=true"
-      - "traefik.tcp.routers.httpbin.rule=Host(`httpbin.localhost`) || HostSNI(`httpbin.localhost`)"
+      - "traefik.tcp.routers.httpbin.rule=HostSNI(`httpbin.localhost`)"
       - "traefik.tcp.routers.httpbin.tls.passthrough=true"
       - "traefik.tcp.routers.httpbin.entrypoints=websecure"
       - "traefik.tcp.services.httpbin.loadbalancer.server.port=443"
@@ -107,7 +107,7 @@ services:
       GATEKEEPER_CLIENT_ID: httpbin-two
     labels:
       - "traefik.enable=true"
-      - "traefik.tcp.routers.httpbin-two.rule=Host(`httpbin-two.localhost`) || HostSNI(`httpbin-two.localhost`)"
+      - "traefik.tcp.routers.httpbin-two.rule=HostSNI(`httpbin-two.localhost`)"
       - "traefik.tcp.routers.httpbin-two.tls.passthrough=true"
       - "traefik.tcp.routers.httpbin-two.entrypoints=websecure"
       - "traefik.tcp.services.httpbin-two.loadbalancer.server.port=443"
@@ -133,7 +133,7 @@ services:
       GATEKEEPER_CLIENT_ID: ace
     labels:
       - "traefik.enable=true"
-      - "traefik.tcp.routers.ace.rule=Host(`ace.localhost`) || HostSNI(`ace.localhost`)"
+      - "traefik.tcp.routers.ace.rule=HostSNI(`ace.localhost`)"
       - "traefik.tcp.routers.ace.tls.passthrough=true"
       - "traefik.tcp.routers.ace.entrypoints=websecure"
       - "traefik.tcp.services.ace.loadbalancer.server.port=443"
