@@ -1,0 +1,35 @@
+digraph G {
+    compound = true;
+    
+    { 
+        rank=same
+        scopes
+        permissions
+    }
+    
+    resources -> scopes [ label="guarded by" ];
+    resources -> permissions [ label="guarded by" ];
+    scopes -> permissions [ label="guarded by" ];
+    
+    scopes -> "HTTP method" [ label="granted by" ];
+    permissions -> policies [ label="granted by" ];
+    policies -> role
+    policies -> time
+    policies -> client
+    policies -> user
+    policies -> "group"
+    policies -> javascript
+    policies -> aggregate
+    
+    subgraph cluster_0 {
+        role
+        time
+        client
+        user
+        "group"
+        javascript
+        aggregate
+        color = transparent
+        label = "determined by";
+    };
+}
