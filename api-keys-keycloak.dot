@@ -1,0 +1,29 @@
+digraph {
+    graph [nodesep=0.7, ranksep=1]
+    script -> gateway [label="1. api key", weight=2]
+
+    gateway -> keycloak [label="2. send api key, skip redirect"]
+    keycloak -> gateway [label="3. authorization code"]
+
+    gateway -> foo_service [label="4. authorization code", weight=2]
+
+    foo_service -> keycloak [label="5. authorization code", weight=3]
+    keycloak -> foo_service [label="6. access token"]
+
+    foo_service -> gateway [label="7. access token"]
+    gateway -> foo_service [label="8. request and access token"]
+
+    foo_service -> gateway [label="9. response"]
+
+    gateway -> script [label="10. response"]
+
+    api_key_mgmt_service -> keycloak [label="add api key"]
+
+    script [shape="note"]
+    keycloak [shape="rect"]
+    {
+        rank=same
+        gateway
+        keycloak
+    }
+}
