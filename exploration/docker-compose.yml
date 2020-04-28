@@ -3,7 +3,7 @@ version: '3.7'
 services:
   traefik:
     image: "traefik:v2.2"
-    container_name: "traefik"
+    container_name: auth-exploration-traefik
     command:
       - "--log.level=DEBUG"
       - "--api.insecure=true"
@@ -37,7 +37,7 @@ services:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: password
-    container_name: keycloak-postgres
+    container_name: auth-exploration-keycloak-postgres
 
   keycloak:
     image: jboss/keycloak:9.0.2
@@ -58,7 +58,7 @@ services:
       # KEYCLOAK_LOGLEVEL: DEBUG
     depends_on:
       - postgres
-    container_name: keycloak
+    container_name: auth-exploration-keycloak
     labels:
       - "traefik.enable=true"
       - "traefik.tcp.routers.keycloak.rule=HostSNI(`keycloak.localhost`)"
@@ -76,7 +76,7 @@ services:
     entrypoint: /gatekeeper/start.sh
     depends_on:
       - keycloak
-    container_name: httpbin-gatekeeper
+    container_name: auth-exploration-httpbin-gatekeeper
     environment:
       GATEKEEPER_CLIENT_ID: httpbin
     labels:
@@ -90,7 +90,7 @@ services:
     image: kennethreitz/httpbin
     depends_on:
       - gatekeeper
-    container_name: httpbin-protected-app
+    container_name: auth-exploration-httpbin-protected-app
 
   gatekeeper-two:
     image: alpine:3.8
@@ -102,7 +102,7 @@ services:
     entrypoint: /gatekeeper/start.sh
     depends_on:
       - keycloak
-    container_name: httpbin-two-gatekeeper
+    container_name: auth-exploration-httpbin-two-gatekeeper
     environment:
       GATEKEEPER_CLIENT_ID: httpbin-two
     labels:
@@ -116,7 +116,7 @@ services:
     image: kennethreitz/httpbin
     depends_on:
       - gatekeeper-two
-    container_name: httpbin-two-protected-app
+    container_name: auth-exploration-httpbin-two-protected-app
 
   gatekeeper-ace:
     image: alpine:3.8
@@ -128,7 +128,7 @@ services:
     entrypoint: /gatekeeper/start.sh
     depends_on:
       - keycloak
-    container_name: ace-gatekeeper
+    container_name: auth-exploration-ace-gatekeeper
     environment:
       GATEKEEPER_CLIENT_ID: ace
     labels:
@@ -140,7 +140,7 @@ services:
 
   ace:
     image: openjdk:8-alpine
-    container_name: ace
+    container_name: auth-exploration-ace
     volumes:
       - ./ace:/ace
       - ./compose/ace/start.sh:/start.sh:ro
