@@ -167,7 +167,6 @@ services:
       - "--log-level=debug"
       - "--log-format=json-pretty"
       - "--set=decision_logs.console=true"
-      - "--authentication=token"
       - "/tmp/opa"
 
   whoami-gatekeeper:
