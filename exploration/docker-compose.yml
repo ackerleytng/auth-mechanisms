@@ -3,7 +3,6 @@ version: '3.7'
 services:
   traefik:
     image: "traefik:v2.2"
-    container_name: auth-exploration-traefik
     command:
       - "--log.level=DEBUG"
       - "--api.insecure=true"
@@ -29,16 +28,6 @@ services:
           - httpbin-two.localhost
           - ace.localhost
 
-  postgres:
-    image: postgres:12
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: keycloak
-      POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: password
-    container_name: auth-exploration-keycloak-postgres
-
   keycloak:
     image: jboss/keycloak:9.0.2
     volumes:
@@ -48,7 +37,7 @@ services:
     entrypoint: /start.sh
     environment:
       DB_VENDOR: POSTGRES
-      DB_ADDR: postgres
+      DB_ADDR: keycloak-postgres
       DB_DATABASE: keycloak
       DB_USER: keycloak
       DB_SCHEMA: public
@@ -57,8 +46,7 @@ services:
       KEYCLOAK_PASSWORD: password
       # KEYCLOAK_LOGLEVEL: DEBUG
     depends_on:
-      - postgres
-    container_name: auth-exploration-keycloak
+      - keycloak-postgres
     labels:
       - "traefik.enable=true"
       - "traefik.tcp.routers.keycloak.rule=HostSNI(`keycloak.localhost`)"
@@ -66,17 +54,30 @@ services:
       - "traefik.tcp.routers.keycloak.entrypoints=websecure"
       - "traefik.tcp.services.keycloak.loadbalancer.server.port=8443"
 
-  gatekeeper:
+  keycloak-postgres:
+    image: postgres:12
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+
+  httpbin:
+    image: kennethreitz/httpbin
+    depends_on:
+      - httpbin-gatekeeper
+
+  httpbin-gatekeeper:
     image: alpine:3.8
     volumes:
-      - ./compose/gatekeeper/config.yml:/gatekeeper/config.yml:ro
-      - ./compose/setup.sh:/gatekeeper/setup.sh:ro
-      - ./compose/start.sh:/gatekeeper/start.sh:ro
+      - ./compose/gatekeeper/httpbin-config.yml:/gatekeeper/config.yml:ro
+      - ./compose/gatekeeper/setup.sh:/gatekeeper/setup.sh:ro
+      - ./compose/gatekeeper/start.sh:/gatekeeper/start.sh:ro
       - ./compose/keycloak/https/tls.crt/:/usr/local/share/ca-certificates/tls.crt:ro
     entrypoint: /gatekeeper/start.sh
     depends_on:
       - keycloak
-    container_name: auth-exploration-httpbin-gatekeeper
     environment:
       GATEKEEPER_CLIENT_ID: httpbin
     labels:
@@ -86,23 +87,21 @@ services:
       - "traefik.tcp.routers.httpbin.entrypoints=websecure"
       - "traefik.tcp.services.httpbin.loadbalancer.server.port=443"
 
-  httpbin:
+  httpbin-two:
     image: kennethreitz/httpbin
     depends_on:
-      - gatekeeper
-    container_name: auth-exploration-httpbin-protected-app
+      - httpbin-two-gatekeeper
 
-  gatekeeper-two:
+  httpbin-two-gatekeeper:
     image: alpine:3.8
     volumes:
-      - ./compose/gatekeeper-two/config.yml:/gatekeeper/config.yml:ro
-      - ./compose/setup.sh:/gatekeeper/setup.sh:ro
-      - ./compose/start.sh:/gatekeeper/start.sh:ro
+      - ./compose/gatekeeper/httpbin-two-config.yml:/gatekeeper/config.yml:ro
+      - ./compose/gatekeeper/setup.sh:/gatekeeper/setup.sh:ro
+      - ./compose/gatekeeper/start.sh:/gatekeeper/start.sh:ro
       - ./compose/keycloak/https/tls.crt/:/usr/local/share/ca-certificates/tls.crt:ro
     entrypoint: /gatekeeper/start.sh
     depends_on:
       - keycloak
-    container_name: auth-exploration-httpbin-two-gatekeeper
     environment:
       GATEKEEPER_CLIENT_ID: httpbin-two
     labels:
@@ -112,23 +111,28 @@ services:
       - "traefik.tcp.routers.httpbin-two.entrypoints=websecure"
       - "traefik.tcp.services.httpbin-two.loadbalancer.server.port=443"
 
-  httpbin-two:
-    image: kennethreitz/httpbin
+  ace:
+    image: openjdk:8-alpine
+    volumes:
+      - ./ace:/ace
+      - ./compose/ace/start.sh:/start.sh:ro
+      - ./compose/keycloak/https/tls.crt/:/tmp/tls.crt:ro
+    working_dir: /ace
     depends_on:
-      - gatekeeper-two
-    container_name: auth-exploration-httpbin-two-protected-app
+      - ace-gatekeeper
+    # Call /start.sh to start ace
+    entrypoint: tail -f /dev/null
 
-  gatekeeper-ace:
+  ace-gatekeeper:
     image: alpine:3.8
     volumes:
-      - ./compose/gatekeeper-ace/config.yml:/gatekeeper/config.yml:ro
-      - ./compose/setup.sh:/gatekeeper/setup.sh:ro
-      - ./compose/start.sh:/gatekeeper/start.sh:ro
+      - ./compose/gatekeeper/ace-config.yml:/gatekeeper/config.yml:ro
+      - ./compose/gatekeeper/setup.sh:/gatekeeper/setup.sh:ro
+      - ./compose/gatekeeper/start.sh:/gatekeeper/start.sh:ro
       - ./compose/keycloak/https/tls.crt/:/usr/local/share/ca-certificates/tls.crt:ro
     entrypoint: /gatekeeper/start.sh
     depends_on:
       - keycloak
-    container_name: auth-exploration-ace-gatekeeper
     environment:
       GATEKEEPER_CLIENT_ID: ace
     labels:
@@ -138,16 +142,52 @@ services:
       - "traefik.tcp.routers.ace.entrypoints=websecure"
       - "traefik.tcp.services.ace.loadbalancer.server.port=443"
 
-  ace:
-    image: openjdk:8-alpine
-    container_name: auth-exploration-ace
+  whoami:
+    image: containous/whoami
+    depends_on:
+      - whoami-openresty
+
+  whoami-openresty:
+    image: openresty/openresty:1.15.8.3-2-buster-fat
     volumes:
-      - ./ace:/ace
-      - ./compose/ace/start.sh:/start.sh:ro
-      - ./compose/keycloak/https/tls.crt/:/tmp/tls.crt:ro
-    working_dir: /ace
-    # Call /start.sh to start ace
-    entrypoint: tail -f /dev/null
+      - ./compose/whoami/openresty/conf.d/:/etc/nginx/conf.d:ro
+    depends_on:
+      - whoami-opa
+    entrypoint: sh -c 'opm get ledgetech/lua-resty-http xiedacon/lua-pretty-json chunpu/lua-min-url && exec /usr/bin/openresty -g "daemon off;"'
+
+  whoami-opa:
+    image: openpolicyagent/opa:0.19.2-rootless
+    volumes:
+      - ./compose/whoami/opa/:/tmp/opa/:ro
+    depends_on:
+      - whoami-gatekeeper
+    command:
+      - "run"
+      - "--server"
+      - "--log-level=debug"
+      - "--log-format=json-pretty"
+      - "--set=decision_logs.console=true"
+      - "--authentication=token"
+      - "/tmp/opa"
+
+  whoami-gatekeeper:
+    image: alpine:3.8
+    volumes:
+      - ./compose/gatekeeper/whoami-config.yml:/gatekeeper/config.yml:ro
+      - ./compose/gatekeeper/setup.sh:/gatekeeper/setup.sh:ro
+      - ./compose/gatekeeper/start.sh:/gatekeeper/start.sh:ro
+      - ./compose/keycloak/https/tls.crt/:/usr/local/share/ca-certificates/tls.crt:ro
+    entrypoint: /gatekeeper/start.sh
+    depends_on:
+      - keycloak
+    environment:
+      GATEKEEPER_CLIENT_ID: whoami
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.whoami.rule=HostSNI(`whoami.localhost`)"
+      - "traefik.tcp.routers.whoami.tls.passthrough=true"
+      - "traefik.tcp.routers.whoami.entrypoints=websecure"
+      - "traefik.tcp.services.whoami.loadbalancer.server.port=443"
 
 volumes:
   postgres-data:

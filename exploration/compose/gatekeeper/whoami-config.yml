@@ -1,0 +1,26 @@
+client-id: whoami
+discovery-url: https://keycloak.localhost/auth/realms/applications
+encryption-key: yrYUNvsPZLfwMMwMiROu6vpbOXhTKdB0
+
+# Turn on debug
+verbose: true
+
+enable-refresh-tokens: true
+
+enable-self-signed-tls: true
+self-signed-tls-hostnames:
+  - whoami.localhost
+listen: :443
+redirection-url: https://whoami.localhost
+upstream-url: http://whoami-openresty:80
+
+# Whitelist everything for now
+enable-default-deny: true
+
+# Use gatekeeper like kong, which handles all authentication
+# Only whitelist /, everything else requires authentication
+resources:
+- uri: /
+  methods:
+  - GET
+  white-listed: true
