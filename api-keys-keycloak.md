@@ -14,8 +14,8 @@ To translate an API key to an access token, we will need a way of
 
 1. Validating that the API key is valid (has been previously created and
    associated with a user and application)
-2. Based on the API key, retrieve an access token and refresh token for a
-   specific resource server
+2. Based on the API key, retrieve an access token and id token for a specific
+   resource server
 
 ## API key management service
 
@@ -34,21 +34,20 @@ To translate an API key to an access token, we will need a way of
 >   check and redirect to keycloak as necessary.
 
 + Proxy requests to upstream service(s) after getting access token
-+ Retain a mapping of API Key to access and refresh token, re-use access token
-  as much as possible, get another access token using its refresh token if
-  necessary
++ Use the implicit flow to exchange the API key for the access token and id token
++ Re-use the API Key to get new access token and id token if access token expires
 + May have to decode the API key into user and api key, depending on whether
   keycloak's authentication SPI can take a single key, without password
+
+> Can the redirect part in the implicit flow be "skipped"?
 
 ## Keycloak's role
 
 > Keycloak will need to be augmented to handle this
 
-+ Decode the API
++ Decode the API key
 + Check that the api key tuple is valid (previously created and associated with
   a user and application)
-+ Return the auth code so that the client can exchange that for an access token
-
 
 ## Alternatives
 
