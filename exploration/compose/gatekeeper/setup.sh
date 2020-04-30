@@ -40,7 +40,6 @@ if [ -z $client_id ]; then
   "name": "${GATEKEEPER_CLIENT_ID}",
   "enabled": true,
   "baseUrl": "https://${GATEKEEPER_CLIENT_ID}.localhost",
-  "directAccessGrantsEnabled": true,
   "redirectUris": ["https://${GATEKEEPER_CLIENT_ID}.localhost/*"]
 }
 EOF
