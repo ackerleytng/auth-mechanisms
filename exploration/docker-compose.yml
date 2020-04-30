@@ -4,7 +4,7 @@ services:
   traefik:
     image: "traefik:v2.2"
     command:
-      - "--log.level=DEBUG"
+      # - "--log.level=DEBUG"
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
@@ -71,9 +71,8 @@ services:
   httpbin-gatekeeper:
     image: alpine:3.8
     volumes:
-      - ./compose/gatekeeper/httpbin-config.yml:/gatekeeper/config.yml:ro
-      - ./compose/gatekeeper/setup.sh:/gatekeeper/setup.sh:ro
-      - ./compose/gatekeeper/start.sh:/gatekeeper/start.sh:ro
+      - ./compose/gatekeeper/:/gatekeeper/:ro
+      - ./compose/gatekeeper/httpbin-config.yml:/tmp/config.yml:ro
       - ./compose/keycloak/https/tls.crt/:/usr/local/share/ca-certificates/tls.crt:ro
     entrypoint: /gatekeeper/start.sh
     depends_on:
@@ -95,9 +94,8 @@ services:
   httpbin-two-gatekeeper:
     image: alpine:3.8
     volumes:
-      - ./compose/gatekeeper/httpbin-two-config.yml:/gatekeeper/config.yml:ro
-      - ./compose/gatekeeper/setup.sh:/gatekeeper/setup.sh:ro
-      - ./compose/gatekeeper/start.sh:/gatekeeper/start.sh:ro
+      - ./compose/gatekeeper/:/gatekeeper/:ro
+      - ./compose/gatekeeper/httpbin-two-config.yml:/tmp/config.yml:ro
       - ./compose/keycloak/https/tls.crt/:/usr/local/share/ca-certificates/tls.crt:ro
     entrypoint: /gatekeeper/start.sh
     depends_on:
@@ -126,11 +124,10 @@ services:
   ace-gatekeeper:
     image: alpine:3.8
     volumes:
-      - ./compose/gatekeeper/ace-config.yml:/gatekeeper/config.yml:ro
-      - ./compose/gatekeeper/setup.sh:/gatekeeper/setup.sh:ro
-      - ./compose/gatekeeper/start.sh:/gatekeeper/start.sh:ro
+      - ./compose/gatekeeper/:/gatekeeper/:ro
+      - ./compose/gatekeeper/ace-config.yml:/tmp/config.yml:ro
       - ./compose/keycloak/https/tls.crt/:/usr/local/share/ca-certificates/tls.crt:ro
-    entrypoint: /gatekeeper/start.sh
+    entrypoint: /gatekeeper/start.sh list detail
     depends_on:
       - keycloak
     environment:
@@ -172,11 +169,10 @@ services:
   whoami-gatekeeper:
     image: alpine:3.8
     volumes:
-      - ./compose/gatekeeper/whoami-config.yml:/gatekeeper/config.yml:ro
-      - ./compose/gatekeeper/setup.sh:/gatekeeper/setup.sh:ro
-      - ./compose/gatekeeper/start.sh:/gatekeeper/start.sh:ro
+      - ./compose/gatekeeper/:/gatekeeper/:ro
+      - ./compose/gatekeeper/whoami-config.yml:/tmp/config.yml:ro
       - ./compose/keycloak/https/tls.crt/:/usr/local/share/ca-certificates/tls.crt:ro
-    entrypoint: /gatekeeper/start.sh
+    entrypoint: /gatekeeper/start.sh access
     depends_on:
       - keycloak
     environment:

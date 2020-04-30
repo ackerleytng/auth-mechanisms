@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Starts gatekeeper up, also configures this client at keycloak
+# Pass client roles that you want to add as arguments
+# Example: ./start.sh list detail
+
 NAME=keycloak-gatekeeper
 KEYCLOAK_VERSION=9.0.2
 GOOS=linux
@@ -21,7 +25,8 @@ update-ca-certificates
 wait-for-it.sh -t 60 keycloak:8443
 
 # Sets up this client with keycloak
-client_secret=$(/gatekeeper/setup.sh)
+#   client roles will be passed to setup.sh
+client_secret=$(/gatekeeper/setup.sh $@)
 
 echo ">>> Using client_secret=|$client_secret|"
-exec /tmp/keycloak-gatekeeper --config /gatekeeper/config.yml --client-secret=$client_secret
+exec /tmp/keycloak-gatekeeper --config /tmp/config.yml --client-secret=$client_secret
