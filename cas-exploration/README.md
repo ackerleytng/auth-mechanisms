@@ -28,3 +28,15 @@ When you're there, test logging in as a user with
 
 + username: user
 + password: default
+
+## Developing
+
+Start the group of services as shown in the Quickstart.
+
+The spring boot server is already set up to auto-reload when the class files change, but the class files change only when recompilation happens, so we have to start auto-rebuilding on code change with
+
+```
+docker-compose exec bootiful sh -c 'cd /bootiful && ./gradlew build --continuous'
+```
+
+I keep two windows open to watch the progress of autoreloading.
