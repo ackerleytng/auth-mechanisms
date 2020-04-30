@@ -112,3 +112,28 @@ curl -X POST -H "Authorization: Basic $(echo -n whoami:d802b673-4816-4201-8d1f-1
 ```
 
 With that access token, you can access the protected endpoint!
+
+## Implementation Ideas
+
+### Gateway component + offline token -> access token caching + endpoint for user to retrieve offline token
+
++ Gateway component
+  + Will have to distinguish API Keys from regular access tokens
+    + Could prefix API keys with a magic string
+  + Will use received offline tokens to get access token
+  + Will cache this offline token to access token mapping so that access tokens
+    that are still valid will be reused
+    + Could perhaps be implemented by storing offline tokens alongside
+      traditional refresh tokens
+  + Send access token upstream for resource server to validate
++ Endpoint for user to retrieve offline token per client, like `/api-key`
+  + Will use the OAuth 2.0 authorization code flow, but request
+    `offline_access` as an additional scope
+  + With the authorization code from the User Agent, the endpoint can then
+    obtain an offline token instead of the usual refresh token and return it to
+    the user for safekeeping
+  + Will need to implement the necessary protections of a redirection endpoint
+    (csrf, etc)
+    + Might be possible to redirect to one of gatekeeper's endpoints?
+    + Perhaps it is possible to use a refresh token to request an offline token
+      by specifying a wider scope?
