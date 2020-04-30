@@ -113,6 +113,10 @@ curl -X POST -H "Authorization: Basic $(echo -n whoami:d802b673-4816-4201-8d1f-1
 
 With that access token, you can access the protected endpoint!
 
+> The `refresh_token` returned with the call using the client's credentials
+>   changes because `jti` and `iat` change. However, the `session_state`
+>   remains the same, so this is effectively the same offline token as before.
+
 ## Implementation Ideas
 
 ### Gateway component + offline token -> access token caching + endpoint for user to retrieve offline token
