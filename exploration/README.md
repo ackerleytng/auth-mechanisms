@@ -1,4 +1,4 @@
-# A protected httpbin for testing
+# A few toy apps for testing authentication and authorization
 
 ## Quickstart
 
@@ -15,6 +15,10 @@ Check that everything is up by watching
 ```
 docker-compose logs -f
 ```
+
+If you're playing with roles, you might want to give `user0` some client roles
+through the keycloak web interface. You'll need to do that first if you're
+working with `ace` or `whoami`.
 
 ### Browser
 
